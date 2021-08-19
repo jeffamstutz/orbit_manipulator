@@ -5,11 +5,6 @@
 
 // Helper functions ///////////////////////////////////////////////////////////
 
-static float degreesToRadians(float degrees)
-{
-  return degrees * M_PI / 180.f;
-}
-
 static glm::vec3 azelToDirection(float az, float el, OrbitAxis axis)
 {
   const float x = std::sin(az) * std::cos(el);
@@ -77,8 +72,8 @@ void Orbit::startNewRotation()
 void Orbit::rotate(glm::vec2 delta)
 {
   delta *= 100;
-  delta.x = m_invertRotation ? delta.x : -delta.x;
-  delta.y = m_distance < 0.f ? -delta.y : delta.y;
+  delta.x = m_invertRotation ? -delta.x : delta.x;
+  delta.y = m_distance < 0.f ? delta.y : -delta.y;
   m_azel += delta;
   m_azel.x = maintainUnitCircle(m_azel.x);
   m_azel.y = maintainUnitCircle(m_azel.y);
@@ -94,7 +89,6 @@ void Orbit::zoom(float delta)
 void Orbit::pan(glm::vec2 delta)
 {
   delta *= m_speed;
-  delta.y = -delta.y;
 
   const glm::vec3 amount = delta.x * m_right + delta.y * m_up;
 
@@ -130,14 +124,24 @@ glm::vec3 Orbit::up() const
   return m_up;
 }
 
+float Orbit::distance() const
+{
+  return m_distance;
+}
+
+glm::vec3 Orbit::eye_FixedDistance() const
+{
+  return m_eyeFixedDistance;
+}
+
 void Orbit::update()
 {
   const float distance = std::abs(m_distance);
 
   const OrbitAxis axis = m_distance < 0.f ? negateAxis(m_axis) : m_axis;
 
-  const float azimuth = degreesToRadians(m_azel.x);
-  const float elevation = degreesToRadians(m_azel.y);
+  const float azimuth = glm::radians(m_azel.x);
+  const float elevation = glm::radians(m_azel.y);
 
   const glm::vec3 toLocalOrbit = azelToDirection(azimuth, elevation, axis);
 
@@ -153,5 +157,6 @@ void Orbit::update()
   m_eye = localOrbitPos + m_at;
   m_up = glm::normalize(cameraUp);
   m_right = glm::normalize(cameraRight);
-}
 
+  m_eyeFixedDistance = (toLocalOrbit * m_originalDistance) + m_at;
+}

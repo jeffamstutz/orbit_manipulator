@@ -36,6 +36,10 @@ class Orbit
   glm::vec3 dir() const;
   glm::vec3 up() const;
 
+  float distance() const;
+
+  glm::vec3 eye_FixedDistance() const; // using original distance
+
  protected:
   void update();
 
@@ -45,16 +49,16 @@ class Orbit
   glm::vec2 m_azel{0.f};
 
   float m_distance{1.f};
-  float m_worldSize{1.f};
+  float m_originalDistance{1.f};
   float m_speed{0.25f};
 
   bool m_invertRotation{false};
 
   glm::vec3 m_eye;
+  glm::vec3 m_eyeFixedDistance;
   glm::vec3 m_at;
   glm::vec3 m_up;
   glm::vec3 m_right;
 
   OrbitAxis m_axis{OrbitAxis::POS_Y};
 };
-
